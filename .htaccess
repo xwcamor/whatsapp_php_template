@@ -1,0 +1,77 @@
+RewriteEngine On
+RewriteBase /whatsapp/
+
+# Permitir acceso a archivos y directorios existentes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirigir todas las solicitudes no existentes a index.php
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+
+# Configuración básica
+Options -Indexes
+DirectoryIndex index.php
+
+# Permitir acceso a las vistas y recursos
+<FilesMatch "\.(php|css|js|png|jpg|gif)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+# Configuración básica de seguridad
+ServerSignature Off
+
+# Proteger archivos sensibles
+<FilesMatch "^(\.env|config\.php|database\.php)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Habilitar compresión GZIP
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript
+</IfModule>
+
+# Prevenir acceso a archivos .htaccess
+<Files .htaccess>
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Prevenir acceso a archivos de configuración
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Configuración de seguridad adicional
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# Establecer el tipo de contenido predeterminado
+DefaultType application/x-httpd-php
+
+# Configuración PHP
+<IfModule mod_php.c>
+    php_flag display_errors off
+    php_value post_max_size 8M
+    php_value upload_max_filesize 8M
+    php_flag session.cookie_httponly on
+    php_flag session.use_only_cookies on
+    php_flag session.use_strict_mode on
+</IfModule>
+
+# Cache control
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule> 
